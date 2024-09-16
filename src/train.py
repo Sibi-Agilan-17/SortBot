@@ -172,5 +172,11 @@ def plot_history(history: tf.keras.callbacks.History):
 
 
 if __name__ == '__main__':
-    for _ in range(10):
-        train_model("sortbot_alpha_new.h5", epochs=1, batch_size=32)
+    batch = 32
+
+    while batch > 1:
+        history = train_model("sortbot_alpha_new.h5", epochs=100, batch_size=batch)
+        plot_history(history)
+
+        batch //= 2
+    
