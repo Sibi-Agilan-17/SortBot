@@ -126,15 +126,24 @@ def train_model(model_path: str, epochs: int = 100, batch_size: int = 32,
     validation_dataset = generate_dataset(batch_size=batch_size)
     logging.debug('Dataset loaded')
 
+    checkpoint_path = "./training/cp-{epoch:04d}.weights.h5"
+
+    cp_callback = tf.keras.callbacks.ModelCheckpoint(
+        checkpoint_path, verbose=1, save_weights_only=True,
+        save_freq='epoch',  # save weights every epoch
+    )
+
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, verbose=1, mode='min',
                                                       restore_best_weights=True)
+
+    model.save_weights(checkpoint_path.format(epoch=0))
 
     # Train the model
     train_history = model.fit(
         dataset,
         validation_data=validation_dataset,
         epochs=epochs,  # Number of epochs for training
-        callbacks=[early_stopping],
+        callbacks=[early_stopping, cp_callback],
     )
 
     if test:
@@ -145,6 +154,7 @@ def train_model(model_path: str, epochs: int = 100, batch_size: int = 32,
     logging.debug('Model saved')
 
     return train_history
+
 
 
 def plot_history(history: tf.keras.callbacks.History):
@@ -179,4 +189,3 @@ if __name__ == '__main__':
         plot_history(history)
 
         batch //= 2
-    
